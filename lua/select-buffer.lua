@@ -112,7 +112,7 @@ local function set_mappings()
     }
 
     for k,v in pairs(mappings) do
-        api.nvim_buf_set_keymap(buf, 'n', k, ':lua require"testplugin".'..v..'<cr>', {
+        api.nvim_buf_set_keymap(buf, 'n', k, ':lua require"select-buffer".'..v..'<cr>', {
             nowait = true, noremap = true, silent = true
         })
     end
@@ -128,6 +128,8 @@ local function main()
     update_view()
     init_cursor()
 end
+
+vim.keymap.set("n", "<leader>bb", ':lua require"select-buffer".main()<cr>')
 
 return {
     main = main,

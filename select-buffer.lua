@@ -12,19 +12,19 @@ local function open_window()
 
     api.nvim_buf_set_option(buf, 'bufhidden', 'wipe')
 
-    -- get dimensions
+    -- Dimensions of main vim window
     local width = api.nvim_get_option("columns")
     local height = api.nvim_get_option("lines")
 
-    -- calculate our floating window size
+    -- Pop-up size calculation
     local win_height = math.ceil(height * 0.8 - 4)
     local win_width = math.ceil(width * 0.8)
 
-    -- and its starting position
+    -- Pop-up starting position
     local row = math.ceil((height - win_height) / 2 - 1)
     local col = math.ceil((width - win_width) / 2)
 
-    -- set some options
+    -- Window options
     local opts = {
         style = "minimal",
         relative = "editor",
@@ -34,12 +34,11 @@ local function open_window()
         col = col
     }
 
-    -- and finally create it with buffer attached
+    -- Create pop-up with buffer attached
     win = api.nvim_open_win(buf, true, opts)
 end
 
-
-local buffer_count = 0
+local buffer_count = 0  -- How many buffers are open (:buffers command output)
 
 local function update_view()
     local result = api.nvim_exec("buffers", true)
@@ -55,41 +54,43 @@ local function update_view()
     api.nvim_buf_set_lines(buf, 3, -1, false, lines)
 end
 
-local function move_cursor()
-    api.nvim_feedkeys("3j^", "n", false)
+local index = 4     -- Current row/position on the pop-up
+local first_buffer_index = 4    -- First buffer text row on the pop-up
+
+local function move_cursor_up(row_column_tuple)
+    if (index + 1) < (buffer_count + first_buffer_index) then
+        index = index + 1
+        api.nvim_win_set_cursor(win, {row_column_tuple[1] + 1, row_column_tuple[2]})
+    end
 end
 
-
-local index = 4
-local first_buffer_index = 4
+local function move_cursor_down(row_column_tuple)
+    if (index - 1) >= first_buffer_index then
+        index = index - 1
+        api.nvim_win_set_cursor(win, {row_column_tuple[1] - 1, row_column_tuple[2]})
+    end
+end
 
 local function set_index(number)
     local row_column_tuple = api.nvim_win_get_cursor(win)
     if number == 1 then
-        if (index + 1) < (buffer_count + first_buffer_index) then
-            index = index + 1
-            api.nvim_win_set_cursor(win, {row_column_tuple[1] + 1, row_column_tuple[2]})
-        end
+        move_cursor_up(row_column_tuple)
     elseif number == -1 then
-        if (index - 1) >= first_buffer_index then
-            index = index - 1
-            api.nvim_win_set_cursor(win, {row_column_tuple[1] - 1, row_column_tuple[2]})
-        end
-    end
-end
-
-local function switch_buffer()
-    local selected_line = api.nvim_buf_get_lines(buf, index - 1, index, true)
-    for k, v in pairs(selected_line) do
-        local left_trim = v:gsub("^%s+", "")
-        local selected_buffer_number = left_trim:match("%S+")
-        api.nvim_win_close(win, true)
-        api.nvim_exec("buffer " .. selected_buffer_number, false)
+        move_cursor_down(row_column_tuple)
     end
 end
 
 local function close_window()
     api.nvim_win_close(win, true)
+    index = 4
+end
+
+local function switch_buffer()
+    local selected_line = api.nvim_buf_get_lines(buf, index - 1, index, true)
+    local left_trim = selected_line[1]:gsub("^%s+", "")
+    local selected_buffer_number = left_trim:match("%S+")
+    close_window()
+    api.nvim_exec("buffer " .. selected_buffer_number, false)
 end
 
 local function set_mappings()
@@ -107,22 +108,25 @@ local function set_mappings()
     end
 end
 
+local function init_cursor()
+    api.nvim_feedkeys("3j^", "n", false)
+end
+
 local function main()
     open_window()
     set_mappings()
     update_view()
-    move_cursor()
+    init_cursor()
 end
 
 return {
     main = main,
     open_window = open_window,
-    update_view = update_view,
     set_mappings = set_mappings,
-    close_window = close_window,
-    center = center,
-    move_cursor = move_cursor,
+    update_view = update_view,
+    init_cursor = init_cursor,
     switch_buffer = switch_buffer,
-    set_index = set_index
+    set_index = set_index,
+    close_window = close_window
 }
 

@@ -1,9 +1,6 @@
 local api = vim.api
 local buf, win
 
-local index = 3
-local buffer_count = 0
-
 local function center(str)
     local width = api.nvim_win_get_width(0)
     local shift = math.floor(width / 2) - math.floor(string.len(str) / 2)
@@ -41,6 +38,9 @@ local function open_window()
     win = api.nvim_open_win(buf, true, opts)
 end
 
+
+local buffer_count = 0
+
 local function update_view()
     local result = api.nvim_exec("buffers", true)
     local lines = {}
@@ -59,23 +59,32 @@ local function move_cursor()
     api.nvim_feedkeys("3j^", "n", false)
 end
 
+
+local index = 4
+local first_buffer_index = 4
+
 local function set_index(number)
-    print("Current index: " .. index)
+    local row_column_tuple = api.nvim_win_get_cursor(win)
     if number == 1 then
-        if (index + 1) < buffer_count then
+        if (index + 1) < (buffer_count + first_buffer_index) then
             index = index + 1
+            api.nvim_win_set_cursor(win, {row_column_tuple[1] + 1, row_column_tuple[2]})
         end
     elseif number == -1 then
-        if (index - 1) > 3 then
+        if (index - 1) >= first_buffer_index then
             index = index - 1
+            api.nvim_win_set_cursor(win, {row_column_tuple[1] - 1, row_column_tuple[2]})
         end
     end
 end
 
 local function switch_buffer()
-    local test = api.nvim_buf_get_lines(buf, index, index + 1, true)
-    for k, v in pairs(test) do
-        print(k .. "  " .. v)
+    local selected_line = api.nvim_buf_get_lines(buf, index - 1, index, true)
+    for k, v in pairs(selected_line) do
+        local left_trim = v:gsub("^%s+", "")
+        local selected_buffer_number = left_trim:match("%S+")
+        api.nvim_win_close(win, true)
+        api.nvim_exec("buffer " .. selected_buffer_number, false)
     end
 end
 
@@ -86,8 +95,8 @@ end
 local function set_mappings()
     local mappings = {
         ['<cr>'] = 'switch_buffer()',
-        j = 'set_index(-1)',
-        k = 'set_index(1)',
+        j = 'set_index(1)',     -- Go down, so Row count increase
+        k = 'set_index(-1)',    -- Go up, so Row count reduces
         q = 'close_window()'
     }
 

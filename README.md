@@ -5,7 +5,7 @@ This plugin is kinda usable as of now. The buffer selection works, but the plugi
 
 # Todo
 - ~~Complete the movement feature and select buffer feature~~
-- Add help menu below the Buffer text
+- ~~Add help menu below the Buffer text~~
 - Prepare the directory structure for 'packer' compatibility
 - Add a demo video for the repo
 - Clean the code and add some color to the display

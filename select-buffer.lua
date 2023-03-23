@@ -1,6 +1,7 @@
 local api = vim.api
 local buf, win
 
+-- TODO Seems like doesn't center too well.
 local function center(str)
     local width = api.nvim_win_get_width(0)
     local shift = math.floor(width / 2) - math.floor(string.len(str) / 2)
@@ -50,12 +51,21 @@ local function update_view()
 
     buffer_count = #lines
 
-    api.nvim_buf_set_lines(buf, 0, 2, false, { "", center("Buffers"), "" })
-    api.nvim_buf_set_lines(buf, 3, -1, false, lines)
+    local width = api.nvim_get_option("columns")
+    local win_width = math.ceil(width * 0.8)
+
+    api.nvim_buf_set_lines(buf, 0, 2, false, {
+        "",
+        center("Buffers"),
+        "",
+        center("Enter: Select   j: Down   k: Up   q: Close"),
+        center(string.rep("-", win_width - 4))
+    })
+    api.nvim_buf_set_lines(buf, 5, -1, false, lines)
 end
 
-local index = 4     -- Current row/position on the pop-up
-local first_buffer_index = 4    -- First buffer text row on the pop-up
+local index = 6     -- Current row/position on the pop-up
+local first_buffer_index = 6    -- First buffer text row on the pop-up
 
 local function move_cursor_up(row_column_tuple)
     if (index + 1) < (buffer_count + first_buffer_index) then
@@ -82,7 +92,7 @@ end
 
 local function close_window()
     api.nvim_win_close(win, true)
-    index = 4
+    index = 6   -- Reset index for the next time pop-up opens
 end
 
 local function switch_buffer()
@@ -109,7 +119,7 @@ local function set_mappings()
 end
 
 local function init_cursor()
-    api.nvim_feedkeys("3j^", "n", false)
+    api.nvim_feedkeys((first_buffer_index - 1) .. "j^", "n", false)
 end
 
 local function main()

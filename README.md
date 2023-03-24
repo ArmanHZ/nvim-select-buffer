@@ -2,7 +2,7 @@
 Plugin for NeoVim to display and switch to a buffer. (also my first nvim plugin)
 
 # Demo
-Will add in a sec
+![demo](./media/plugin_demo.gif)
 
 # Installation
 Using [packer.nvim](https://github.com/wbthomason/packer.nvim)
@@ -14,7 +14,7 @@ use 'ArmanHZ/nvim-select-buffer'
 
 # Setting keybinding to launch the plugin
 
-Create the `selectbuffer.lua` file in the `/after directory` and add the following lines:
+Create the `selectbuffer.lua` file in the `/after` directory and add the following lines:
 
 ```lua
 -- In /after/selectbuffer.lua file
@@ -26,6 +26,6 @@ vim.keymap.set("n", "<leader>bb", select_buffer.main)   -- You can use any keybi
 - ~~Complete the movement feature and select buffer feature~~
 - ~~Add help menu below the Buffer text~~
 - ~~Prepare the directory structure for 'packer' compatibility~~
-- Add a demo video for the repo
+- ~~Add a demo video for the repo~~
 - Clean the code and add some color to the display
 

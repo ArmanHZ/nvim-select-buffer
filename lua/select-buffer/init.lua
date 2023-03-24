@@ -1,14 +1,16 @@
 local api = vim.api
 local buf, win
 
+local M = {}
+
 -- TODO Seems like doesn't center too well.
-local function center(str)
+M.center = function(str)
     local width = api.nvim_win_get_width(0)
     local shift = math.floor(width / 2) - math.floor(string.len(str) / 2)
     return string.rep(' ', shift) .. str
 end
 
-local function open_window()
+M.open_window = function()
     buf = api.nvim_create_buf(false, true) -- create new emtpy buffer
 
     api.nvim_buf_set_option(buf, 'bufhidden', 'wipe')
@@ -41,12 +43,12 @@ end
 
 local buffer_count = 0  -- How many buffers are open (:buffers command output)
 
-local function update_view()
+M.update_view = function()
     local result = api.nvim_exec("buffers", true)
     local lines = {}
 
     for s in result:gmatch("[^\r\n]+") do
-        table.insert(lines, center(s))
+        table.insert(lines, M.center(s))
     end
 
     buffer_count = #lines
@@ -56,10 +58,10 @@ local function update_view()
 
     api.nvim_buf_set_lines(buf, 0, 2, false, {
         "",
-        center("Buffers"),
+        M.center("Buffers"),
         "",
-        center("Enter: Select   j: Down   k: Up   q: Close"),
-        center(string.rep("-", win_width - 4))
+        M.center("Enter: Select   j: Down   k: Up   q: Close"),
+        M.center(string.rep("-", win_width - 4))
     })
     api.nvim_buf_set_lines(buf, 5, -1, false, lines)
 end
@@ -67,43 +69,43 @@ end
 local index = 6     -- Current row/position on the pop-up
 local first_buffer_index = 6    -- First buffer text row on the pop-up
 
-local function move_cursor_up(row_column_tuple)
+M.move_cursor_up = function(row_column_tuple)
     if (index + 1) < (buffer_count + first_buffer_index) then
         index = index + 1
         api.nvim_win_set_cursor(win, {row_column_tuple[1] + 1, row_column_tuple[2]})
     end
 end
 
-local function move_cursor_down(row_column_tuple)
+M.move_cursor_down = function(row_column_tuple)
     if (index - 1) >= first_buffer_index then
         index = index - 1
         api.nvim_win_set_cursor(win, {row_column_tuple[1] - 1, row_column_tuple[2]})
     end
 end
 
-local function set_index(number)
+M.set_index = function(number)
     local row_column_tuple = api.nvim_win_get_cursor(win)
     if number == 1 then
-        move_cursor_up(row_column_tuple)
+        M.move_cursor_up(row_column_tuple)
     elseif number == -1 then
-        move_cursor_down(row_column_tuple)
+        M.move_cursor_down(row_column_tuple)
     end
 end
 
-local function close_window()
+M.close_window = function()
     api.nvim_win_close(win, true)
     index = 6   -- Reset index for the next time pop-up opens
 end
 
-local function switch_buffer()
+M.switch_buffer = function()
     local selected_line = api.nvim_buf_get_lines(buf, index - 1, index, true)
     local left_trim = selected_line[1]:gsub("^%s+", "")
     local selected_buffer_number = left_trim:match("%S+")
-    close_window()
+    M.close_window()
     api.nvim_exec("buffer " .. selected_buffer_number, false)
 end
 
-local function set_mappings()
+M.set_mappings = function()
     local mappings = {
         ['<cr>'] = 'switch_buffer()',
         j = 'set_index(1)',     -- Go down, so Row count increase
@@ -118,27 +120,20 @@ local function set_mappings()
     end
 end
 
-local function init_cursor()
+M.init_cursor = function()
     api.nvim_feedkeys((first_buffer_index - 1) .. "j^", "n", false)
 end
 
-local function main()
-    open_window()
-    set_mappings()
-    update_view()
-    init_cursor()
+M.main = function()
+    M.open_window()
+    M.set_mappings()
+    M.update_view()
+    M.init_cursor()
 end
 
-vim.keymap.set("n", "<leader>bb", ':lua require"select-buffer".main()<cr>')
+-- print("test")
+-- vim.keymap.set("n", "<leader>bb", ':lua require"select-buffer".main()<cr>')
+vim.keymap.set("n", "<leader>bb", M.main)
 
-return {
-    main = main,
-    open_window = open_window,
-    set_mappings = set_mappings,
-    update_view = update_view,
-    init_cursor = init_cursor,
-    switch_buffer = switch_buffer,
-    set_index = set_index,
-    close_window = close_window
-}
+return M
 

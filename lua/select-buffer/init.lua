@@ -131,9 +131,5 @@ M.main = function()
     M.init_cursor()
 end
 
--- print("test")
--- vim.keymap.set("n", "<leader>bb", ':lua require"select-buffer".main()<cr>')
-vim.keymap.set("n", "<leader>bb", M.main)
-
 return M
 

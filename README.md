@@ -14,10 +14,10 @@ use 'ArmanHZ/nvim-select-buffer'
 
 # Setting keybinding to launch the plugin
 
-Create the `selectbuffer.lua` file in the `/after` directory and add the following lines:
+Create the `selectbuffer.lua` file in the `/after/plugin` directory and add the following lines:
 
 ```lua
--- In /after/selectbuffer.lua file
+-- In /after/plugin/selectbuffer.lua file
 local select_buffer = require("select-buffer")
 vim.keymap.set("n", "<leader>bb", select_buffer.main)   -- You can use any keybinding you want
 ```

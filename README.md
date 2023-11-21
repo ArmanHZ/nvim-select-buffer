@@ -23,9 +23,14 @@ vim.keymap.set("n", "<leader>bb", select_buffer.main)   -- You can use any keybi
 ```
 
 # Todo
-- ~~Complete the movement feature and select buffer feature~~
-- ~~Add help menu below the Buffer text~~
-- ~~Prepare the directory structure for 'packer' compatibility~~
-- ~~Add a demo video for the repo~~
-- Clean the code and add some color to the display
+- [x] ~~Complete the movement feature and select buffer feature~~
+- [x] ~~Add help menu below the Buffer text~~
+- [x] ~~Prepare the directory structure for 'packer' compatibility~~
+- [x] ~~Add a demo video for the repo~~
+- [x] ~~Added line highlighting for the buffer window for better visibility~~
+- [ ] Update old api calls to new ones (exec -> exec2)
+- [ ] Re-write the buffer order, s.t. latest buffers will be at the top
+- [ ] Clean the code and add some color to the display
+- [ ] Disable some movement keys while showing the buffer
+- [ ] Update the demo and readme after all these tasks are done
 

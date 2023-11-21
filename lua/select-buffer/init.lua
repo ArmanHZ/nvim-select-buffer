@@ -21,7 +21,7 @@ M.open_window = function()
 
     -- Pop-up size calculation
     local win_height = math.ceil(height * 0.8 - 4)
-    local win_width = math.ceil(width * 0.8)
+    local win_width = math.ceil(width * 0.5)
 
     -- Pop-up starting position
     local row = math.ceil((height - win_height) / 2 - 1)
@@ -39,6 +39,10 @@ M.open_window = function()
 
     -- Create pop-up with buffer attached
     win = api.nvim_open_win(buf, true, opts)
+    api.nvim_win_set_option(win, 'cursorline', true)
+    -- Visual color, since the pop-up is different color. Normal cursorline color might fail in some themes.
+    local visual_color = vim.fn.synIDattr(vim.fn.synIDtrans(vim.fn.hlID("Visual")), "bg", "gui")
+    api.nvim_set_hl(0, 'CursorLine', { bg = visual_color})
 end
 
 local buffer_count = 0  -- How many buffers are open (:buffers command output)
@@ -61,7 +65,7 @@ M.update_view = function()
         M.center("Buffers"),
         "",
         M.center("Enter: Select   j: Down   k: Up   q: Close"),
-        M.center(string.rep("-", win_width - 4))
+        M.center(string.rep("-", win_width / 2))
     })
     api.nvim_buf_set_lines(buf, 5, -1, false, lines)
 end

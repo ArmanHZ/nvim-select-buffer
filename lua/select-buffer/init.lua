@@ -114,11 +114,25 @@ M.set_mappings = function()
         ['<cr>'] = 'switch_buffer()',
         j = 'set_index(1)',     -- Go down, so Row count increase
         k = 'set_index(-1)',    -- Go up, so Row count reduces
-        q = 'close_window()'
+        q = 'close_window()',
+        ['<esc>'] = 'close_window()',    -- Works slower than q. TODO: Fix
     }
 
     for k,v in pairs(mappings) do
         api.nvim_buf_set_keymap(buf, 'n', k, ':lua require"select-buffer".'..v..'<cr>', {
+            nowait = true, noremap = true, silent = true
+        })
+    end
+end
+
+M.set_unmappings = function()
+    local unmappings = {
+        h = '<nop>',
+        l = '<nop>'
+    }
+
+    for k,v in pairs(unmappings) do
+        api.nvim_buf_set_keymap(buf, 'n', k, v, {
             nowait = true, noremap = true, silent = true
         })
     end
@@ -131,6 +145,7 @@ end
 M.main = function()
     M.open_window()
     M.set_mappings()
+    M.set_unmappings()
     M.update_view()
     M.init_cursor()
 end

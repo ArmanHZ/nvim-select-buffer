@@ -48,7 +48,7 @@ end
 local buffer_count = 0  -- How many buffers are open (:buffers command output)
 
 M.update_view = function()
-    local result = api.nvim_exec("buffers", true)
+    local result = api.nvim_exec2("buffers", {output = true}).output
     local lines = {}
 
     for s in result:gmatch("[^\r\n]+") do
@@ -106,7 +106,7 @@ M.switch_buffer = function()
     local left_trim = selected_line[1]:gsub("^%s+", "")
     local selected_buffer_number = left_trim:match("%S+")
     M.close_window()
-    api.nvim_exec("buffer " .. selected_buffer_number, false)
+    api.nvim_exec2("buffer " .. selected_buffer_number, {})
 end
 
 M.set_mappings = function()

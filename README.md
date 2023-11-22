@@ -28,9 +28,9 @@ vim.keymap.set("n", "<leader>bb", select_buffer.main)   -- You can use any keybi
 - [x] ~~Prepare the directory structure for 'packer' compatibility~~
 - [x] ~~Add a demo video for the repo~~
 - [x] ~~Added line highlighting for the buffer window for better visibility~~
-- [ ] Update old api calls to new ones (exec -> exec2)
+- [x] ~~Update old api calls to new ones (exec -> exec2)~~
 - [ ] Re-write the buffer order, s.t. latest buffers will be at the top
 - [ ] Clean the code and add some color to the display
-- [x] Disable some movement keys while showing the buffer (add unmappings)
+- [x] ~~Disable some movement keys while showing the buffer (add unmappings)~~
 - [ ] Update the demo and readme after all these tasks are done
 

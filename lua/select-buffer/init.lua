@@ -3,10 +3,27 @@ local buf, win
 
 local M = {}
 
--- TODO Seems like doesn't center too well.
 M.center = function(str)
     local width = api.nvim_win_get_width(0)
     local shift = math.floor(width / 2) - math.floor(string.len(str) / 2)
+    return string.rep(' ', shift) .. str
+end
+
+M.left_align = function(str)
+    local width = api.nvim_win_get_width(0)
+    local shift = math.floor(width - (width * 0.85))
+    return string.rep(' ', shift) .. str
+end
+
+M.right_align = function(str, edit_flag)
+    local width = api.nvim_win_get_width(0)
+    local shift
+    if edit_flag == ''
+    then
+        shift = math.floor(width - (width * 0.30) - string.len(str))
+    else
+        shift = math.floor(width - (width * 0.30) - string.len(str) - string.len(edit_flag))
+    end
     return string.rep(' ', shift) .. str
 end
 
@@ -21,7 +38,7 @@ M.open_window = function()
 
     -- Pop-up size calculation
     local win_height = math.ceil(height * 0.8 - 4)
-    local win_width = math.ceil(width * 0.5)
+    local win_width = math.ceil(width * 0.6)
 
     -- Pop-up starting position
     local row = math.ceil((height - win_height) / 2 - 1)
@@ -45,17 +62,43 @@ M.open_window = function()
     api.nvim_set_hl(0, 'CursorLine', { bg = visual_color})
 end
 
-local buffer_count = 0  -- How many buffers are open (:buffers command output)
+BUFFER_COUNT = 0  -- How many buffers are open (:buffers command output)
+
+M.get_buffers = function()
+    local active_buffers = api.nvim_list_bufs()
+    local listed_buffers = {}
+    for _, v in pairs(active_buffers) do
+        if (api.nvim_buf_get_option(v, 'buflisted'))
+        then
+            local buffer_info = {} -- id, full path, modified, (read only, file type) Maybe in future if needed
+            table.insert(buffer_info, v)
+
+            local buffer_name = api.nvim_buf_get_name(v)
+            if buffer_name == '' then
+                buffer_name = "[No Name]"
+            end
+            table.insert(buffer_info, buffer_name)
+
+            if api.nvim_buf_get_option(v, "modified") then
+                table.insert(buffer_info, "[+]")
+            else
+                table.insert(buffer_info, "")
+            end
+
+            table.insert(listed_buffers, buffer_info)
+        end
+    end
+    BUFFER_COUNT = #listed_buffers
+    return listed_buffers
+end
 
 M.update_view = function()
-    local result = api.nvim_exec2("buffers", {output = true}).output
     local lines = {}
 
-    for s in result:gmatch("[^\r\n]+") do
-        table.insert(lines, M.center(s))
+    local result = M.get_buffers()
+    for _, v in pairs(result) do
+        table.insert(lines, M.left_align(v[1]) .. " " .. v[3] .. M.right_align(v[2], v[3]))
     end
-
-    buffer_count = #lines
 
     local width = api.nvim_get_option("columns")
     local win_width = math.ceil(width * 0.8)
@@ -74,7 +117,7 @@ local index = 6     -- Current row/position on the pop-up
 local first_buffer_index = 6    -- First buffer text row on the pop-up
 
 M.move_cursor_up = function(row_column_tuple)
-    if (index + 1) < (buffer_count + first_buffer_index) then
+    if (index + 1) < (BUFFER_COUNT + first_buffer_index) then
         index = index + 1
         api.nvim_win_set_cursor(win, {row_column_tuple[1] + 1, row_column_tuple[2]})
     end

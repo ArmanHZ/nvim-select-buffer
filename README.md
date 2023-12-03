@@ -4,6 +4,13 @@ Plugin for NeoVim to display and switch to a buffer. (also my first nvim plugin)
 # Demo
 ![demo](./media/plugin_demo_2.gif)
 
+# Key Features
+- Every buffer will get a timestamp when opened
+- Timestamps will be updated when you switch to the buffer
+- Buffers are sorted by their timestamps
+- The switched/current buffer will always be the second on the list. This is because you don't want to switch to the current buffer
+- The previous buffer will be the first. This is for quick access/switch between two frequently used buffers
+
 # Installation
 Using [packer.nvim](https://github.com/wbthomason/packer.nvim)
 

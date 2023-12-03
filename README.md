@@ -39,5 +39,5 @@ vim.keymap.set("n", "<leader>bb", select_buffer.main)   -- You can use any keybi
 - [x] ~~Update old api calls to new ones (exec -> exec2)~~
 - [x] ~~Re-write the buffer order, s.t. latest buffers will be at the top~~
 - [x] ~~Disable some movement keys while showing the buffer (add unmappings)~~
-- [x] Update the demo and readme after all these tasks are done
+- [x] ~~Update the demo and readme after all these tasks are done~~
 

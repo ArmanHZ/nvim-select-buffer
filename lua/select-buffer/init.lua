@@ -92,10 +92,42 @@ M.get_buffers = function()
     return listed_buffers
 end
 
+M.set_buffer_variable_timestamp = function(buffers)
+    for i, v in pairs(buffers) do
+        local isSet, _ = pcall(api.nvim_buf_get_var, v[1], "timestamp")
+        if not isSet
+        then
+            -- When you have multiple buffers that have the same timestamp,
+            -- it can mess up the order. Deducing a small integer helps.
+            -- This only applies to buffers who don't have a timestamp.
+            local timestamp = M.get_timestamp() - i
+            api.nvim_buf_set_var(v[1], "timestamp", timestamp)
+            table.insert(v, timestamp)
+        else
+            v[4] = api.nvim_buf_get_var(v[1], "timestamp")
+        end
+    end
+end
+
+M.get_timestamp = function ()
+    return os.time()
+end
+
 M.update_view = function()
     local lines = {}
-
     local result = M.get_buffers()
+    M.set_buffer_variable_timestamp(result)
+
+    -- Sort by timestamp
+    table.sort(result, function(a, b)
+        return a[4] > b[4]
+    end)
+
+    -- Current buffer will be one below for usability.
+    local temp = result[1]
+    result[1] = result[2]
+    result[2] = temp
+
     for _, v in pairs(result) do
         table.insert(lines, M.left_align(v[1]) .. " " .. v[3] .. M.right_align(v[2], v[3]))
     end
@@ -144,11 +176,16 @@ M.close_window = function()
     index = 6   -- Reset index for the next time pop-up opens
 end
 
+-- TODO: fix how we get the number
 M.switch_buffer = function()
     local selected_line = api.nvim_buf_get_lines(buf, index - 1, index, true)
     local left_trim = selected_line[1]:gsub("^%s+", "")
     local selected_buffer_number = left_trim:match("%S+")
     M.close_window()
+
+    local timestamp = M.get_timestamp()
+    api.nvim_buf_set_var(tonumber(selected_buffer_number), "timestamp", timestamp)
+
     api.nvim_exec2("buffer " .. selected_buffer_number, {})
 end
 
@@ -158,7 +195,7 @@ M.set_mappings = function()
         j = 'set_index(1)',     -- Go down, so Row count increase
         k = 'set_index(-1)',    -- Go up, so Row count reduces
         q = 'close_window()',
-        ['<esc>'] = 'close_window()',    -- Works slower than q. TODO: Fix
+        ['<esc>'] = 'close_window()',    -- Works slower than q. TODO: Fix (somehow)
     }
 
     for k,v in pairs(mappings) do
